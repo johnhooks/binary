@@ -3,7 +3,7 @@
     "sourceMap": true,
     "target": "es2017",
     "moduleResolution": "node",
-    "types": ["node", "jest"],
+    "types": ["node"],
     "outDir": "lib",
     "declaration": true,
     "module": "commonjs",

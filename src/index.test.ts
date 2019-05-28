@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 import { Binary } from "./index";
 import { u8, u16, u32, u64, f32, f64 } from "./NumberType";
 let binary: any;
