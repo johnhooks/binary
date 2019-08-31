@@ -1,7 +1,7 @@
 /**
  * Author: John Hooks
  * URL: https://github.com/johnhooks/binary
- * Version: 0.1.0
+ * Version: 0.1.1
  *
  * This file is part of Binary.
  *
