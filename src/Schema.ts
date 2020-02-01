@@ -19,77 +19,33 @@
  * along with Binary.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { u8, u16, u32, u64, f32, f64, NumberType } from "./NumberType";
+import { Field, FieldInputs } from './types.d';
 
 interface IndexOf<T> {
   [key: string]: T;
   [index: number]: T;
 }
 
-/**
- * Used to allow a `SchemaBuilder` to set the private indexes on it's `Schema`
- * argument.
- */
-const indexes = Symbol("indexes");
-
-class Field {
-  constructor(
-    readonly name: string,
-    readonly type: NumberType,
-    readonly signature: number
-  ) {}
-}
-
-class SchemaBuilder {
-  constructor(private schema: Schema) {}
-
-  u8(signature: number, name: string) {
-    this.addField(u8, name, signature);
-  }
-
-  u16(signature: number, name: string) {
-    this.addField(u16, name, signature);
-  }
-
-  u32(signature: number, name: string) {
-    this.addField(u32, name, signature);
-  }
-
-  u64(signature: number, name: string) {
-    this.addField(u64, name, signature);
-  }
-
-  f32(signature: number, name: string) {
-    this.addField(f32, name, signature);
-  }
-
-  f64(signature: number, name: string) {
-    this.addField(f64, name, signature);
-  }
-
-  private addField(type: NumberType, name: string, signature: number) {
-    const field = new Field(name, type, signature);
-    if (Reflect.has(this.schema[indexes], name)) {
-      throw new Error(`Attempted to set name '${name}' twice`);
-    } else if (Reflect.has(this.schema[indexes], signature)) {
-      throw new Error(`Attempted to set signature '${signature}' twice`);
-    } else {
-      this.schema[indexes][name] = field;
-      this.schema[indexes][signature] = field;
-    }
-    this.schema[indexes][name] = field;
-  }
-}
-
 export class Schema {
-  public [indexes]: IndexOf<Field> = {};
+  private indexes: IndexOf<Field> = {};
 
-  constructor(builder: (instance: SchemaBuilder) => void) {
-    const schemaBuilder: SchemaBuilder = new SchemaBuilder(this);
-    builder(schemaBuilder);
+  constructor(readonly signature: number, readonly name: string, fieldInputs: Array<FieldInputs>) {
+    for (let i = 0, len = fieldInputs.length; i < len; i++) {
+      const [signature, type, name] = fieldInputs[i]; // eslint-disable-line no-shadow
+      const field = { name, type, signature };
+      if (Reflect.has(this.indexes, name)) {
+        throw new Error(`Attempted to set name '${name}' twice`);
+      } else if (Reflect.has(this.indexes, signature)) {
+        throw new Error(`Attempted to set signature '${signature}' twice`);
+      } else {
+        this.indexes[name] = field;
+        this.indexes[signature] = field;
+      }
+      this.indexes[name] = field;
+    }
   }
 
   get(index: string | number): Field | undefined {
-    return this[indexes][index];
+    return this.indexes[index];
   }
 }

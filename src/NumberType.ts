@@ -19,92 +19,73 @@
  * along with Binary.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-interface IReadNumber {
-  (byteOffset: number): number;
-}
-
-interface IWriteNumber {
-  (value: number, byteOffset: number): number;
-}
-
-/**
- * A class to help build serial protocol schemas.
- */
-export class NumberType {
-  constructor(
-    readonly byteLength: number,
-    readonly read: IReadNumber,
-    readonly write: IWriteNumber
-  ) {}
-}
+import { NumberType } from './types.d';
 
 /**
  * An Unsigned 8 Bit Integer
  */
-export const u8 = new NumberType(
-  1,
-  Buffer.prototype.readUInt8,
-  Buffer.prototype.writeUInt8
-);
+export const u8: NumberType = {
+  byteLength: 1,
+  read: Buffer.prototype.readUInt8,
+  write: Buffer.prototype.writeUInt8,
+};
 
 /**
  * An Unsigned 16 Bit Integer
  */
-export const u16 = new NumberType(
-  2,
-  Buffer.prototype.readUInt16LE,
-  Buffer.prototype.writeUInt16LE
-);
+export const u16: NumberType = {
+  byteLength: 2,
+  read: Buffer.prototype.readUInt16LE,
+  write: Buffer.prototype.writeUInt16LE,
+};
 
 /**
  * An Unsigned 32 Bit Integer
  */
-export const u32 = new NumberType(
-  4,
-  Buffer.prototype.readUInt32LE,
-  Buffer.prototype.writeUInt32LE
-);
+export const u32: NumberType = {
+  byteLength: 4,
+  read: Buffer.prototype.readUInt32LE,
+  write: Buffer.prototype.writeUInt32LE,
+};
 
 /**
  * An Unsigned 64 Bit Integer
  *
  * Consider using BigInt.
  */
-export const u64 = new NumberType(
-  8,
+export const u64: NumberType = {
+  byteLength: 8,
 
-  function readUInt64LE(this: Buffer, byteOffset: number): number {
+  /* readUInt64LE */
+  read(this: Buffer, byteOffset: number): number {
     const left = this.readUInt32LE(byteOffset);
     const right = this.readUInt32LE(byteOffset + 4);
     const number = left + right * 2 ** 32; // combine the two 32-bit values
     if (!Number.isSafeInteger(number)) {
-      console.warn(number, "exceeds MAX_SAFE_INTEGER.");
+      console.warn(number, 'exceeds MAX_SAFE_INTEGER.');
     }
     return number;
   },
-  function writeUInt64LE(
-    this: Buffer,
-    value: number,
-    byteOffset: number
-  ): number {
+  /* writeUInt64LE */
+  write(this: Buffer, value: number, byteOffset: number): number {
     return this.writeBigUInt64LE(BigInt(value), byteOffset);
-  }
-);
+  },
+};
 
 /**
  * A 32 Bit Floating Point Number
  */
-export const f32 = new NumberType(
-  4,
-  Buffer.prototype.readFloatLE,
-  Buffer.prototype.writeFloatLE
-);
+export const f32: NumberType = {
+  byteLength: 4,
+  read: Buffer.prototype.readFloatLE,
+  write: Buffer.prototype.writeFloatLE,
+};
 
 /**
  * A 64 Bit Floating Point Number
  */
-export const f64 = new NumberType(
-  8,
-  Buffer.prototype.readDoubleLE,
-  Buffer.prototype.writeDoubleLE
-);
+export const f64: NumberType = {
+  byteLength: 8,
+  read: Buffer.prototype.readDoubleLE,
+  write: Buffer.prototype.writeDoubleLE,
+};
