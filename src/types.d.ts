@@ -64,7 +64,7 @@ declare class Binary {
   slice(start?: number, end?: number): Binary;
   insert(source: Buffer, sourceStart: number, sourceEnd: number, jump?: boolean): number;
   write(type: NumberType, value: number): number;
-  read(type: NumberType): void;
+  read(type: NumberType): number;
 }
 
 declare class Schema {
