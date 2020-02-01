@@ -1,25 +1,4 @@
-/**
- * Author: John Hooks
- * URL: https://github.com/johnhooks/binary
- * Version: 0.2.1
- *
- * This file is part of Binary.
- *
- * Binary is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Binary is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Binary.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, lines-between-class-members */
 
 interface ReadNumber {
   (byteOffset: number): number;
@@ -32,8 +11,6 @@ interface WriteNumber {
 /**
  * An interface to help build serial protocol schemas.
  */
-/* eslint-disable lines-between-class-members */
-
 export interface NumberType {
   readonly byteLength: number;
   readonly read: ReadNumber;
