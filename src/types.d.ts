@@ -1,7 +1,7 @@
 /**
  * Author: John Hooks
  * URL: https://github.com/johnhooks/binary
- * Version: 0.2.0
+ * Version: 0.2.1
  *
  * This file is part of Binary.
  *
@@ -39,6 +39,13 @@ export interface NumberType {
   readonly read: ReadNumber;
   readonly write: WriteNumber;
 }
+
+export const u8: NumberType;
+export const u16: NumberType;
+export const u32: NumberType;
+export const f32: NumberType;
+export const u64: NumberType;
+export const f64: NumberType;
 
 export type FieldInputs = [number, NumberType, string];
 

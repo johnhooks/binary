@@ -2,7 +2,7 @@
   "name": "@bitmachina/binary",
   "description": "A Node.js Buffer Wrapper",
   "repository": "github:johnhooks/binary",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/binary.js",
   "typings": "dist/binary.d.ts",
   "files": [
