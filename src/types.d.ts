@@ -36,7 +36,7 @@ declare class Binary {
   length: number;
   byteOffset: number;
   raw: Buffer;
-  constructor(buffer: Buffer | number, byteOffset?);
+  constructor(buffer: Buffer | number, byteOffset?: number);
   toBuffer(): Buffer;
   slice(start?: number, end?: number): Binary;
   insert(source: Buffer, sourceStart: number, sourceEnd: number, jump?: boolean): number;
