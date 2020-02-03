@@ -2,7 +2,7 @@ import { NumberType } from './types.d';
 
 /**
  * A Node.js Buffer Wrapper.
- * Intended for serializing/deserializing data using a predefined schema.
+ * Intended for serializing/de-serializing data using a predefined schema.
  */
 export class Binary {
   private _buffer: Buffer;
@@ -80,7 +80,7 @@ export class Binary {
    * Insert the contents of another buffer into the wrapped buffer starting at the current offset.
    * @param source The buffer from which to copy.
    * @param sourceStart The offset within `source` from which to begin copying.
-   * @param sourceEnd The offset within `source` from which to stop copying (not inclucive).
+   * @param sourceEnd The offset within `source` from which to stop copying (not inclusive).
    * @param jump Whether or not to adjust the offset to the end position of the insert.
    * @returns The end position of the insert.
    */

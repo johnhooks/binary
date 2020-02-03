@@ -2,7 +2,7 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.renderWhitespace": "boundary",
-  "editor.rulers": [140],
+  "editor.rulers": [100],
   "editor.formatOnSave": true,
   "files.encoding": "utf8",
   "files.trimTrailingWhitespace": true,
@@ -14,5 +14,6 @@
     "dist/**": true,
     "node_modules/**": true
   },
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": false }
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": false },
+  "auto-close-tag.activationOnLanguage": ["typescriptreact", "HTML (Eex)"]
 }
