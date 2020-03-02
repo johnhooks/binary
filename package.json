@@ -2,7 +2,7 @@
   "name": "@bitmachina/binary",
   "description": "A Node.js Buffer Wrapper",
   "repository": "github:johnhooks/binary",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "main": "dist/binary.js",
   "typings": "dist/binary.d.ts",
   "files": [
@@ -17,6 +17,8 @@
     "prebuild": "shx rm -rf dist",
     "build": "rollup -c && shx cp src/types.d.ts dist/binary.d.ts",
     "lint": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "lint:nofix": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet",
+    "prepare": "npm run lint:nofix && npm run test && npm run build",
     "test": "jest"
   },
   "author": "John Hooks <bitmachina@outlook.com>",
