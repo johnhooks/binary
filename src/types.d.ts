@@ -24,14 +24,6 @@ export const f32: NumberType;
 export const u64: NumberType;
 export const f64: NumberType;
 
-export type FieldInputs = [number, NumberType, string];
-
-export interface Field {
-  readonly name: string;
-  readonly type: NumberType;
-  readonly signature: number;
-}
-
 declare class Binary {
   length: number;
   byteOffset: number;
@@ -44,9 +36,8 @@ declare class Binary {
   read(type: NumberType): number;
 }
 
-declare class Schema {
-  readonly signature: number;
-  readonly name: string;
-  constructor(signature: number, name: string, fieldInputs: Array<FieldInputs>);
-  get(index: string | number): Field | undefined;
+declare class Builder {
+  write(type: NumberType, value: number): Builder;
+  toBytes(): Array<number>;
+  toBuffer(): Buffer;
 }
