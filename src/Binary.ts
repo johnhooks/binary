@@ -107,7 +107,7 @@ export class Binary {
    * @param type The [[NumberType]] to read from the buffer.
    * @returns The value read from the buffer.
    */
-  read(type: NumberType) {
+  read(type: NumberType): number {
     const value = type.read.call(this._buffer, this._byteOffset);
     this._byteOffset += type.byteLength;
     return value;
