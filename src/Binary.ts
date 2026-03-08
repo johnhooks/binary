@@ -1,4 +1,4 @@
-import { NumberType } from './types.d';
+import type { NumberType } from './types.d';
 
 /**
  * A Node.js Buffer Wrapper.
@@ -22,7 +22,7 @@ export class Binary {
       this._buffer = buffer.slice(byteOffset, buffer.length); // Create a new view
       this._byteOffset = 0;
     } else {
-      this._buffer = Buffer.alloc(buffer);
+      this._buffer = Buffer.alloc(buffer as number);
       this._byteOffset = 0;
     }
   }

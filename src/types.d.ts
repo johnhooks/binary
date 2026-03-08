@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file, lines-between-class-members */
-
 interface ReadNumber {
   (byteOffset: number): number;
 }
