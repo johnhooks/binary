@@ -50,7 +50,7 @@ Requires Node >= 22 (for `ArrayBuffer.prototype.transfer`).
 | `f32` | 4     | 32-bit float                       |
 | `f64` | 8     | 64-bit float (full precision)      |
 
-All multi-byte types use **little-endian** byte order.
+All multi-byte types default to **little-endian** byte order. Big-endian classes (`BigEndianBuilder`, `BigEndianBinary`) are available for protocols that need it.
 
 ## Docs
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { Builder } from './Builder';
+import { Builder, BigEndianBuilder } from './Builder';
 import { u8, u16, f32 } from './NumberType';
 
 describe('Builder', () => {
@@ -35,6 +35,19 @@ describe('Builder', () => {
       const builder = new Builder();
       const result = builder.write(u8, 1).write(u16, 2).write(f32, 3.14);
       expect(result).toBe(builder);
+    });
+  });
+
+  describe('BigEndianBuilder', () => {
+    test('writes u16 in big-endian byte order', () => {
+      const buffer = new BigEndianBuilder().write(u16, 0x0102).toArrayBuffer();
+      const view = new DataView(buffer);
+      expect(view.getUint16(0, false)).toBe(0x0102);
+    });
+
+    test('toBytes respects big-endian', () => {
+      const bytes = new BigEndianBuilder().write(u16, 0x0102).toBytes();
+      expect(bytes).toEqual([0x01, 0x02]);
     });
   });
 
