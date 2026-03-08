@@ -1,39 +1,49 @@
-import type { NumberType } from './types.d';
+import type { NumberType } from './NumberType';
 
 export type Data = [NumberType, number];
 
 /**
- * A Node.js Buffer Builder using NumberType.
+ * An ArrayBuffer Builder using NumberType.
  * Constructs an array of (NumberType, number) tuples, which can be converted
- * to an array of bytes or a buffer.
+ * to an array of bytes or an ArrayBuffer.
  */
 export class Builder {
-  private byteLength = 0;
-  private data: Array<Data> = [];
+  #byteLength = 0;
+  #data: Array<Data> = [];
+  #transferred = false;
+
+  #assertNotTransferred(): void {
+    if (this.#transferred) {
+      throw new Error('Builder has been transferred and can no longer be used');
+    }
+  }
 
   /**
-   * @param {NumberType} type The number type of `value`.
-   * @param {number} value - The value to be written to the buffer
-   * @returns {Builder} this - The current offset of the buffer after the write
+   * @param type The number type of `value`.
+   * @param value The value to be written to the buffer.
+   * @returns this
    */
   write(type: NumberType, value: number): Builder {
-    this.data.push([type, value]);
-    this.byteLength += type.byteLength;
+    this.#assertNotTransferred();
+    this.#data.push([type, value]);
+    this.#byteLength += type.byteLength;
     return this;
   }
 
   /**
-   * @returns {Array<number>} An array of bytes built using the data written to the Builder.
+   * @returns An array of bytes built using the data written to the Builder.
    */
   toBytes(): Array<number> {
+    this.#assertNotTransferred();
     const bytes: Array<number> = [];
-    const buffer = Buffer.alloc(8);
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
 
-    for (let i = 0, len = this.data.length; i < len; i++) {
-      const [type, value] = this.data[i];
-      type.write.call(buffer, value, 0);
-      for (let j = 0, len = type.byteLength; j < len; j++) {
-        bytes.push(buffer.readUInt8(j));
+    for (const [type, value] of this.#data) {
+      type.write(view, value, 0);
+      const u8view = new Uint8Array(buffer, 0, type.byteLength);
+      for (const byte of u8view) {
+        bytes.push(byte);
       }
     }
 
@@ -41,18 +51,39 @@ export class Builder {
   }
 
   /**
-   * @returns {Buffer} A Buffer built using the data written to the Builder.
+   * @returns A Uint8Array built using the data written to the Builder.
    */
-  toBuffer(): Buffer {
-    const buffer = Buffer.alloc(this.byteLength);
+  toUint8Array(): Uint8Array {
+    this.#assertNotTransferred();
+    return new Uint8Array(this.toArrayBuffer());
+  }
+
+  /**
+   * @returns An ArrayBuffer built using the data written to the Builder.
+   */
+  toArrayBuffer(): ArrayBuffer {
+    this.#assertNotTransferred();
+    const buffer = new ArrayBuffer(this.#byteLength);
+    const view = new DataView(buffer);
     let byteOffset = 0;
 
-    for (let i = 0, len = this.data.length; i < len; i++) {
-      const [type, value] = this.data[i];
-      type.write.call(buffer, value, byteOffset);
+    for (const [type, value] of this.#data) {
+      type.write(view, value, byteOffset);
       byteOffset += type.byteLength;
     }
 
     return buffer;
+  }
+
+  /**
+   * Builds the ArrayBuffer and transfers it, making this Builder unusable.
+   * The returned buffer is ready for postMessage transfer lists.
+   * @returns A transferable ArrayBuffer.
+   */
+  toTransferable(): ArrayBuffer {
+    this.#assertNotTransferred();
+    const buffer = this.toArrayBuffer();
+    this.#transferred = true;
+    return buffer.transfer();
   }
 }

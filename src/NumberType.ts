@@ -1,12 +1,19 @@
-import type { NumberType } from './types.d';
+/**
+ * An interface to help build serial protocol schemas.
+ */
+export interface NumberType {
+  readonly byteLength: number;
+  readonly read: (view: DataView, byteOffset: number) => number;
+  readonly write: (view: DataView, value: number, byteOffset: number) => void;
+}
 
 /**
  * An Unsigned 8 Bit Integer
  */
 export const u8: NumberType = {
   byteLength: 1,
-  read: Buffer.prototype.readUInt8,
-  write: Buffer.prototype.writeUInt8,
+  read: (view, offset) => view.getUint8(offset),
+  write: (view, value, offset) => view.setUint8(offset, value),
 };
 
 /**
@@ -14,8 +21,8 @@ export const u8: NumberType = {
  */
 export const u16: NumberType = {
   byteLength: 2,
-  read: Buffer.prototype.readUInt16LE,
-  write: Buffer.prototype.writeUInt16LE,
+  read: (view, offset) => view.getUint16(offset, true),
+  write: (view, value, offset) => view.setUint16(offset, value, true),
 };
 
 /**
@@ -23,8 +30,8 @@ export const u16: NumberType = {
  */
 export const u32: NumberType = {
   byteLength: 4,
-  read: Buffer.prototype.readUInt32LE,
-  write: Buffer.prototype.writeUInt32LE,
+  read: (view, offset) => view.getUint32(offset, true),
+  write: (view, value, offset) => view.setUint32(offset, value, true),
 };
 
 /**
@@ -34,20 +41,17 @@ export const u32: NumberType = {
  */
 export const u64: NumberType = {
   byteLength: 8,
-
-  /* readUInt64LE */
-  read(this: Buffer, byteOffset: number): number {
-    const left = this.readUInt32LE(byteOffset);
-    const right = this.readUInt32LE(byteOffset + 4);
-    const number = left + right * 2 ** 32; // combine the two 32-bit values
-    if (!Number.isSafeInteger(number)) {
-      console.warn(number, 'exceeds MAX_SAFE_INTEGER.');
+  read(view, offset) {
+    const low = view.getUint32(offset, true);
+    const high = view.getUint32(offset + 4, true);
+    const value = low + high * 2 ** 32;
+    if (!Number.isSafeInteger(value)) {
+      throw new RangeError(`${value} exceeds MAX_SAFE_INTEGER`);
     }
-    return number;
+    return value;
   },
-  /* writeUInt64LE */
-  write(this: Buffer, value: number, byteOffset: number): number {
-    return this.writeBigUInt64LE(BigInt(value), byteOffset);
+  write(view, value, offset) {
+    view.setBigUint64(offset, BigInt(value), true);
   },
 };
 
@@ -56,8 +60,8 @@ export const u64: NumberType = {
  */
 export const f32: NumberType = {
   byteLength: 4,
-  read: Buffer.prototype.readFloatLE,
-  write: Buffer.prototype.writeFloatLE,
+  read: (view, offset) => view.getFloat32(offset, true),
+  write: (view, value, offset) => view.setFloat32(offset, value, true),
 };
 
 /**
@@ -65,6 +69,6 @@ export const f32: NumberType = {
  */
 export const f64: NumberType = {
   byteLength: 8,
-  read: Buffer.prototype.readDoubleLE,
-  write: Buffer.prototype.writeDoubleLE,
+  read: (view, offset) => view.getFloat64(offset, true),
+  write: (view, value, offset) => view.setFloat64(offset, value, true),
 };
