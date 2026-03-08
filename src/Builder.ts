@@ -1,4 +1,4 @@
-import { NumberType } from './types.d';
+import type { NumberType } from './types.d';
 
 export type Data = [NumberType, number];
 
