@@ -1,10 +1,20 @@
 /**
+ * Byte order for multi-byte types.
+ */
+export type Endian = 'little' | 'big';
+
+/**
  * An interface to help build serial protocol schemas.
  */
 export interface NumberType {
   readonly byteLength: number;
-  readonly read: (view: DataView, byteOffset: number) => number;
-  readonly write: (view: DataView, value: number, byteOffset: number) => void;
+  readonly read: (view: DataView, byteOffset: number, littleEndian: boolean) => number;
+  readonly write: (
+    view: DataView,
+    value: number,
+    byteOffset: number,
+    littleEndian: boolean,
+  ) => void;
 }
 
 /**
@@ -30,8 +40,8 @@ export const i8: NumberType = {
  */
 export const u16: NumberType = {
   byteLength: 2,
-  read: (view, offset) => view.getUint16(offset, true),
-  write: (view, value, offset) => view.setUint16(offset, value, true),
+  read: (view, offset, le) => view.getUint16(offset, le),
+  write: (view, value, offset, le) => view.setUint16(offset, value, le),
 };
 
 /**
@@ -39,8 +49,8 @@ export const u16: NumberType = {
  */
 export const i16: NumberType = {
   byteLength: 2,
-  read: (view, offset) => view.getInt16(offset, true),
-  write: (view, value, offset) => view.setInt16(offset, value, true),
+  read: (view, offset, le) => view.getInt16(offset, le),
+  write: (view, value, offset, le) => view.setInt16(offset, value, le),
 };
 
 /**
@@ -48,8 +58,8 @@ export const i16: NumberType = {
  */
 export const u32: NumberType = {
   byteLength: 4,
-  read: (view, offset) => view.getUint32(offset, true),
-  write: (view, value, offset) => view.setUint32(offset, value, true),
+  read: (view, offset, le) => view.getUint32(offset, le),
+  write: (view, value, offset, le) => view.setUint32(offset, value, le),
 };
 
 /**
@@ -57,8 +67,8 @@ export const u32: NumberType = {
  */
 export const i32: NumberType = {
   byteLength: 4,
-  read: (view, offset) => view.getInt32(offset, true),
-  write: (view, value, offset) => view.setInt32(offset, value, true),
+  read: (view, offset, le) => view.getInt32(offset, le),
+  write: (view, value, offset, le) => view.setInt32(offset, value, le),
 };
 
 /**
@@ -68,17 +78,17 @@ export const i32: NumberType = {
  */
 export const u64: NumberType = {
   byteLength: 8,
-  read(view, offset) {
-    const low = view.getUint32(offset, true);
-    const high = view.getUint32(offset + 4, true);
+  read(view, offset, le) {
+    const low = view.getUint32(le ? offset : offset + 4, le);
+    const high = view.getUint32(le ? offset + 4 : offset, le);
     const value = low + high * 2 ** 32;
     if (!Number.isSafeInteger(value)) {
       throw new RangeError(`${value} exceeds MAX_SAFE_INTEGER`);
     }
     return value;
   },
-  write(view, value, offset) {
-    view.setBigUint64(offset, BigInt(value), true);
+  write(view, value, offset, le) {
+    view.setBigUint64(offset, BigInt(value), le);
   },
 };
 
@@ -89,17 +99,17 @@ export const u64: NumberType = {
  */
 export const i64: NumberType = {
   byteLength: 8,
-  read(view, offset) {
-    const low = view.getUint32(offset, true);
-    const high = view.getInt32(offset + 4, true);
+  read(view, offset, le) {
+    const low = view.getUint32(le ? offset : offset + 4, le);
+    const high = view.getInt32(le ? offset + 4 : offset, le);
     const value = low + high * 2 ** 32;
     if (!Number.isSafeInteger(value)) {
       throw new RangeError(`${value} exceeds safe integer range`);
     }
     return value;
   },
-  write(view, value, offset) {
-    view.setBigInt64(offset, BigInt(value), true);
+  write(view, value, offset, le) {
+    view.setBigInt64(offset, BigInt(value), le);
   },
 };
 
@@ -108,8 +118,8 @@ export const i64: NumberType = {
  */
 export const f32: NumberType = {
   byteLength: 4,
-  read: (view, offset) => view.getFloat32(offset, true),
-  write: (view, value, offset) => view.setFloat32(offset, value, true),
+  read: (view, offset, le) => view.getFloat32(offset, le),
+  write: (view, value, offset, le) => view.setFloat32(offset, value, le),
 };
 
 /**
@@ -117,6 +127,6 @@ export const f32: NumberType = {
  */
 export const f64: NumberType = {
   byteLength: 8,
-  read: (view, offset) => view.getFloat64(offset, true),
-  write: (view, value, offset) => view.setFloat64(offset, value, true),
+  read: (view, offset, le) => view.getFloat64(offset, le),
+  write: (view, value, offset, le) => view.setFloat64(offset, value, le),
 };

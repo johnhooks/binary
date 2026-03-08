@@ -7,10 +7,15 @@ export type Data = [NumberType, number];
  * Constructs an array of (NumberType, number) tuples, which can be converted
  * to an array of bytes or an ArrayBuffer.
  */
-export class Builder {
+class BaseBuilder {
   #byteLength = 0;
   #data: Array<Data> = [];
   #transferred = false;
+  #littleEndian: boolean;
+
+  constructor(littleEndian: boolean) {
+    this.#littleEndian = littleEndian;
+  }
 
   #assertNotTransferred(): void {
     if (this.#transferred) {
@@ -23,7 +28,7 @@ export class Builder {
    * @param value The value to be written to the buffer.
    * @returns this
    */
-  write(type: NumberType, value: number): Builder {
+  write(type: NumberType, value: number): this {
     this.#assertNotTransferred();
     this.#data.push([type, value]);
     this.#byteLength += type.byteLength;
@@ -40,7 +45,7 @@ export class Builder {
     const view = new DataView(buffer);
 
     for (const [type, value] of this.#data) {
-      type.write(view, value, 0);
+      type.write(view, value, 0, this.#littleEndian);
       const u8view = new Uint8Array(buffer, 0, type.byteLength);
       for (const byte of u8view) {
         bytes.push(byte);
@@ -68,7 +73,7 @@ export class Builder {
     let byteOffset = 0;
 
     for (const [type, value] of this.#data) {
-      type.write(view, value, byteOffset);
+      type.write(view, value, byteOffset, this.#littleEndian);
       byteOffset += type.byteLength;
     }
 
@@ -85,5 +90,23 @@ export class Builder {
     const buffer = this.toArrayBuffer();
     this.#transferred = true;
     return buffer.transfer();
+  }
+}
+
+/**
+ * Little-endian ArrayBuffer Builder.
+ */
+export class Builder extends BaseBuilder {
+  constructor() {
+    super(true);
+  }
+}
+
+/**
+ * Big-endian ArrayBuffer Builder.
+ */
+export class BigEndianBuilder extends BaseBuilder {
+  constructor() {
+    super(false);
   }
 }

@@ -4,17 +4,20 @@ import type { NumberType } from './NumberType';
  * An ArrayBuffer wrapper.
  * Intended for serializing/de-serializing data using a predefined schema.
  */
-export class Binary {
+class BaseBinary {
   #buffer: ArrayBuffer;
   #view: DataView;
   #byteOffset: number;
+  #littleEndian: boolean;
 
   /**
+   * @param littleEndian Whether to use little-endian byte order.
    * @param buffer Either an ArrayBuffer or the byte length with which to create one.
-   * @param byteOffset Optionally, if an ArrayBuffer is provided, initialize the view
-   * starting at `byteOffset`.
+   * @param byteOffset Optional starting byte offset into the buffer.
    */
-  constructor(buffer: ArrayBuffer | number, byteOffset = 0) {
+  constructor(littleEndian: boolean, buffer: ArrayBuffer | number, byteOffset = 0) {
+    this.#littleEndian = littleEndian;
+
     if (buffer instanceof ArrayBuffer) {
       if (byteOffset < 0 || byteOffset >= buffer.byteLength) {
         throw new RangeError('Provided byteOffset is not within the range of the buffer');
@@ -78,10 +81,11 @@ export class Binary {
    * @param start The position to begin the slice. Default is 0.
    * @param end The position to end the slice (not inclusive). Default is the
    * wrapped buffer's length.
-   * @returns A new Binary wrapping a copy of the sliced region.
+   * @returns A new instance wrapping a copy of the sliced region.
    */
-  slice(start = 0, end = this.#view.byteLength): Binary {
-    return new Binary(this.#buffer.slice(start, end));
+  slice(start = 0, end = this.#view.byteLength): this {
+    const Constructor = this.constructor as new (buffer: ArrayBuffer, byteOffset?: number) => this;
+    return new Constructor(this.#buffer.slice(start, end));
   }
 
   /**
@@ -110,7 +114,7 @@ export class Binary {
    * @returns The current offset of the buffer after the write.
    */
   write(type: NumberType, value: number): number {
-    type.write(this.#view, value, this.#byteOffset);
+    type.write(this.#view, value, this.#byteOffset, this.#littleEndian);
     this.#byteOffset += type.byteLength;
     return this.#byteOffset;
   }
@@ -120,8 +124,26 @@ export class Binary {
    * @returns The value read from the buffer.
    */
   read(type: NumberType): number {
-    const value = type.read(this.#view, this.#byteOffset);
+    const value = type.read(this.#view, this.#byteOffset, this.#littleEndian);
     this.#byteOffset += type.byteLength;
     return value;
+  }
+}
+
+/**
+ * Little-endian ArrayBuffer wrapper.
+ */
+export class Binary extends BaseBinary {
+  constructor(buffer: ArrayBuffer | number, byteOffset = 0) {
+    super(true, buffer, byteOffset);
+  }
+}
+
+/**
+ * Big-endian ArrayBuffer wrapper.
+ */
+export class BigEndianBinary extends BaseBinary {
+  constructor(buffer: ArrayBuffer | number, byteOffset = 0) {
+    super(false, buffer, byteOffset);
   }
 }

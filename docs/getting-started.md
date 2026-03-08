@@ -8,7 +8,7 @@
 - **`Binary`** -- wrap an existing buffer for sequential reading and writing
 - **Number types** -- `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `f32`, `f64`
 
-The number types describe how to encode a value: how many bytes it takes and how to read/write it with a `DataView`. Every multi-byte type uses little-endian byte order.
+The number types describe how to encode a value: how many bytes it takes and how to read/write it with a `DataView`. Every multi-byte type defaults to little-endian byte order. Big-endian variants are available when you need them.
 
 ## Builder
 
@@ -155,8 +155,13 @@ The number types (`u8`, `i8`, `u16`, etc.) are plain objects that implement the 
 ```ts
 interface NumberType {
   readonly byteLength: number;
-  readonly read: (view: DataView, byteOffset: number) => number;
-  readonly write: (view: DataView, value: number, byteOffset: number) => void;
+  readonly read: (view: DataView, byteOffset: number, littleEndian: boolean) => number;
+  readonly write: (
+    view: DataView,
+    value: number,
+    byteOffset: number,
+    littleEndian: boolean,
+  ) => void;
 }
 ```
 
@@ -167,12 +172,35 @@ import type { NumberType } from '@bitmachina/binary';
 
 const bool: NumberType = {
   byteLength: 1,
-  read: (view, offset) => (view.getUint8(offset) !== 0 ? 1 : 0),
-  write: (view, value, offset) => view.setUint8(offset, value ? 1 : 0),
+  read: (view, offset, _le) => (view.getUint8(offset) !== 0 ? 1 : 0),
+  write: (view, value, offset, _le) => view.setUint8(offset, value ? 1 : 0),
 };
 ```
 
 Custom types work with both `Binary` and `Builder` -- they're just read/write strategies.
+
+## Big-endian
+
+If you're working with a big-endian protocol, import the big-endian classes. Alias them to the standard names and everything else looks the same:
+
+```ts
+import {
+  BigEndianBuilder as Builder,
+  BigEndianBinary as Binary,
+  u8,
+  u16,
+  u32,
+} from '@bitmachina/binary';
+
+const buffer = new Builder().write(u32, 44100).write(u16, 128).write(u8, 2).toArrayBuffer();
+
+const bin = new Binary(buffer);
+bin.read(u32); // 44100
+bin.read(u16); // 128
+bin.read(u8); // 2
+```
+
+The default `Builder` and `Binary` classes use little-endian, which is what you want for most Web/Audio Worklet use cases. The big-endian variants exist for when you need them — network protocols, certain file formats, etc.
 
 ## A real-world example
 
