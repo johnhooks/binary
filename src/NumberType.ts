@@ -1,4 +1,4 @@
-import { NumberType } from './types.d';
+import type { NumberType } from './types.d';
 
 /**
  * An Unsigned 8 Bit Integer

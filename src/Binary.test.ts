@@ -1,5 +1,4 @@
-/// <reference types="jest" />
-
+import { describe, test, expect, beforeEach } from 'vitest';
 import { Binary } from './Binary';
 import { u8, u16, u32, u64, f32, f64 } from './NumberType';
 
