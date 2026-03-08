@@ -14,6 +14,8 @@
     "dist/**": true,
     "node_modules/**": true
   },
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": false },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "never"
+  },
   "auto-close-tag.activationOnLanguage": ["typescriptreact", "HTML (Eex)"]
 }
