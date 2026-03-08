@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { Binary } from './Binary';
+import { Binary, BigEndianBinary } from './Binary';
 import { u8, u16, u32, u64, f32, f64 } from './NumberType';
 
 let binary: Binary;
@@ -345,5 +345,50 @@ describe('Binary#read', () => {
     test('contains the correct value', () => {
       expect(result).toBe(value);
     });
+  });
+});
+
+describe('BigEndianBinary', () => {
+  test('writes and reads u16 in big-endian', () => {
+    const binary = new BigEndianBinary(64);
+    binary.write(u16, 0x0102);
+    const view = new DataView(binary.raw);
+    expect(view.getUint16(0, false)).toBe(0x0102);
+    binary.byteOffset = 0;
+    expect(binary.read(u16)).toBe(0x0102);
+  });
+
+  test('writes and reads u32 in big-endian', () => {
+    const binary = new BigEndianBinary(64);
+    binary.write(u32, 0x01020304);
+    const view = new DataView(binary.raw);
+    expect(view.getUint32(0, false)).toBe(0x01020304);
+    binary.byteOffset = 0;
+    expect(binary.read(u32)).toBe(0x01020304);
+  });
+
+  test('writes and reads f64 in big-endian', () => {
+    const binary = new BigEndianBinary(64);
+    binary.write(f64, Math.PI);
+    const view = new DataView(binary.raw);
+    expect(view.getFloat64(0, false)).toBe(Math.PI);
+    binary.byteOffset = 0;
+    expect(binary.read(f64)).toBe(Math.PI);
+  });
+
+  test('u8 is unaffected by endianness', () => {
+    const binary = new BigEndianBinary(64);
+    binary.write(u8, 0xff);
+    binary.byteOffset = 0;
+    expect(binary.read(u8)).toBe(0xff);
+  });
+
+  test('slice preserves type', () => {
+    const binary = new BigEndianBinary(64);
+    binary.write(u16, 0x0102);
+    binary.write(u16, 0x0304);
+    const sliced = binary.slice(2, 4);
+    expect(sliced).toBeInstanceOf(BigEndianBinary);
+    expect(sliced.read(u16)).toBe(0x0304);
   });
 });
