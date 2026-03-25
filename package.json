@@ -2,7 +2,7 @@
   "name": "@bitmachina/binary",
   "description": "A tiny toolkit for reading and writing binary data with ArrayBuffer and DataView",
   "repository": "github:johnhooks/binary",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
